@@ -2,7 +2,6 @@
 
 #include "display.h"
 
-static Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 static byte displayDigits[] = {
   191, /* 0 [00111111]  Painting numbers, with numbers.  */
   6,   /* 1 [00000110]                                   */
@@ -20,7 +19,13 @@ static byte displayDigits[] = {
   94,  /* d [01011110]                                   */
   121, /* E [01111001]                                   */
   113, /* F [01110001]                                   */
+  84,  /* n [01010100] 16                                */
+  119, /* A [01110111]                                   */
+  121, /* E [01111001]  E is double defined              */
+  56,  /* L [00111000]                                   */
+  57,  /* C [00111001]                                   */
 };
+
 
 void DisplayStart(void) {
 	pixels.setBrightness(10);
@@ -33,18 +38,32 @@ uint32_t Color(uint8_t r, uint8_t g, uint8_t b) {
 
 
 // place starts from zero for the farthest right digit
-
-void DisplayDigit(uint8_t number, uint8_t place, uint32_t color) {
-  for( int seg=0; seg < NUMSEGMENTS; seg++ ) {
-    if( displayDigits[number] & (1 << seg) ) {
-      for( int segLed=0; segLed < LEDSPERSEGMENT; segLed++ ) {
-        //pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*place + LEDSPERSEGMENT*seg + segLed, color );
-        pixels.setPixelColor(NUMPIXELS - ((LEDSPERDIGIT * place) + (LEDSPERSEGMENT * seg) + segLed) , color);
+void DisplaySubliminalMessage(uint32_t color) {
+  pixels.clear();
+  for( int currentLetter = 0; currentLetter < 6; currentLetter++) {
+    for( int seg=0; seg < NUMSEGMENTS; seg++ ) {
+      if( displayDigits[currentLetter + 16] & (1 << seg) ) {
+        for( int segLed=0; segLed < LEDSPERSEGMENT; segLed++ ) {
+          pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*currentLetter + LEDSPERSEGMENT*seg + segLed - 1, color );
+        }
       }
     }
   }
   
-  pixels.show(); // This sends the updated pixel color to the hardware.
+  //pixels.show(); // This sends the updated pixel color to the hardware.
+}
+
+// place starts from zero for the farthest right digit
+void DisplayDigit(uint8_t number, uint8_t place, uint32_t color) {
+  for( int seg=0; seg < NUMSEGMENTS; seg++ ) {
+    if( displayDigits[number] & (1 << seg) ) {
+      for( int segLed=0; segLed < LEDSPERSEGMENT; segLed++ ) {
+        pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*place + LEDSPERSEGMENT*seg + segLed - 1, color );
+      }
+    }
+  }
+  
+  //pixels.show(); // This sends the updated pixel color to the hardware.
 }
 
 void DisplayNumber(uint32_t number, uint32_t color, unsigned char show_dot) {
@@ -60,17 +79,19 @@ void DisplayNumber(uint32_t number, uint32_t color, unsigned char show_dot) {
   currentNumber = number % 10;
   for(uint32_t currentPlace = 0; number > 0; number /= 10, currentNumber = number % 10, ++currentPlace)
   {
-    Serial.println(currentPlace);
     DisplayDigit( currentNumber, currentPlace, pixels.Color(255, 0, 0) );
   }
 
-  pixels.show(); // This sends the updated pixel color to the hardware.
 }
 
 void ClearStrip() {
   for(uint16_t i=0; i<pixels.numPixels(); i++) {
       pixels.setPixelColor(i, pixels.Color(0,0,0));
   }
+  //pixels.show();
+}
+
+void ShowPixels() {
   pixels.show();
 }
 
@@ -91,5 +112,5 @@ void DisplayDashes(uint32_t color) {
     }
   }
 
-  pixels.show(); // This sends the updated pixel color to the hardware.
+  //pixels.show(); // This sends the updated pixel color to the hardware.
 }

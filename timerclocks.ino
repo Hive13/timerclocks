@@ -58,11 +58,10 @@ Timezone usEastern(usEDT, usEST);
 void setup()
 {
   Serial.begin(115200);
-  Serial.println();
+  Serial.println("test");
   Serial.println();
   
-	DisplayStart();
-  DisplayDigit(pow(10, NUMDISPLAYS) - 1, Color(255,0,0), 0);
+  DisplayStart();
 
 
   // We start by connecting to a WiFi network
@@ -86,7 +85,8 @@ void setup()
   Serial.println(udp.localPort());
 
   setSyncProvider(ntpUpdateTime);
-  setSyncInterval(30);
+  // resync the time every five minutes
+  setSyncInterval(300);
 }
 
 void loop()
@@ -114,10 +114,16 @@ void loop()
 
   the_time = minute(eastern) + 100 * hourFormat12(eastern);
 
-  DisplayNumber(the_time, Color(255, 0, 0), 0);
+  if(random(0, 10) < 3) {
+    DisplaySubliminalMessage(Color(255, 0, 0));
+    ShowPixels();
+    delay(10);
+  }
 
+  DisplayNumber(the_time, Color(255, 0, 0), 0);
+  ShowPixels();
   // wait before asking for the time again
-  delay(1000);
+  delay(30000);
 }
 
 // send an NTP request to the time server at the given address

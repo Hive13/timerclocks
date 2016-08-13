@@ -29,19 +29,7 @@
 
 #include <Adafruit_NeoPixel.h>
 
-void ClearStrip();
-void DisplayNumber(long number, uint32_t color, unsigned char show_dot);
-
-// Which pin on the ESP is connected to the NeoPixels?
-#define PIN            D1
-
-// How many NeoPixels are attached to the ESP?
-#define NUMPIXELS      246
-#define NUMDISPLAYS    5
-#define MAXDISPLAYVAL  99999
-#define NUMSEGMENTS    7
-#define LEDSPERSEGMENT 7
-#define LEDSPERDIGIT   ( NUMSEGMENTS*LEDSPERSEGMENT )
+#include "display.h"
 
 char ssid[] = "hive13int";  //  your network SSID (name)
 char pass[] = "hive13int";       // your network password
@@ -67,36 +55,14 @@ TimeChangeRule usEDT = {"EDT", Second, Sun, Mar, 2, -240};  //UTC - 4 hours
 TimeChangeRule usEST = {"EST", First, Sun, Nov, 2, -300};   //UTC - 5 hours
 Timezone usEastern(usEDT, usEST);
 
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
-
-byte displayDigits[] = {
-  191, /* 0 [00111111]  Painting numbers, with numbers.  */
-  6,   /* 1 [00000110]                                   */
-  91,  /* 2 [01011011]    1                              */
-  79,  /* 3 [01001111]  6   2                            */
-  102, /* 4 [01100110]    7                              */
-  109, /* 5 [01101101]  5   3                            */
-  253, /* 6 [01111101]    4                              */
-  7,   /* 7 [00000111]                                   */ 
-  255, /* 8 [01111111]                                   */
-  239, /* 9 [01101111]                                   */
-  119, /* A [01110111]                                   */
-  140, /* b [01111100]                                   */
-  88,  /* c [01011000]                                   */
-  94,  /* d [01011110]                                   */
-  121, /* E [01111001]                                   */
-  113, /* F [01110001]                                   */
-};
-
 void setup()
 {
   Serial.begin(115200);
   Serial.println();
   Serial.println();
   
-  pixels.setBrightness(10);
-  pixels.begin(); // This initializes the NeoPixel library.
-  DisplayDigit(pow(10, NUMDISPLAYS) - 1, pixels.Color(255,0,0), 0);
+	DisplayStart();
+  DisplayDigit(pow(10, NUMDISPLAYS) - 1, Color(255,0,0), 0);
 
 
   // We start by connecting to a WiFi network
@@ -148,9 +114,7 @@ void loop()
 
   the_time = second() + 100 * minute();
 
-  DisplayNumber((uint32_t) 9, pixels.Color(255,0,0), 0);
-  //DisplayNumber(the_time, pixels.Color(255,0,0), 0);
-
+  DisplayNumber(the_time, Color(255, 0, 0), 0);
 
   // wait before asking for the time again
   delay(500);
@@ -219,66 +183,4 @@ time_t ntpUpdateTime()
   
   // return Unix time:
   return ntpTime;
-}
-
-// place starts from zero for the farthest right digit
-
-void DisplayDigit(uint8_t number, uint8_t place, uint32_t color) {
-  for( int seg=0; seg < NUMSEGMENTS; seg++ ) {
-    if( displayDigits[number] & (1 << seg) ) {
-      for( int segLed=0; segLed < LEDSPERSEGMENT; segLed++ ) {
-        //pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*place + LEDSPERSEGMENT*seg + segLed, color );
-        pixels.setPixelColor(NUMPIXELS - ((LEDSPERDIGIT * place) + (LEDSPERSEGMENT * seg) + segLed) , color);
-      }
-    }
-  }
-  
-  pixels.show(); // This sends the updated pixel color to the hardware.
-}
-
-void DisplayNumber(uint32_t number, uint32_t color, unsigned char show_dot) {
-  uint32_t currentNumber = 0;
-  
-  /* int number = a number from 0-99999 */
-  if(number < 0 || number > MAXDISPLAYVAL) {
-    return;
-  }
-  
-  pixels.clear(); 
-
-  currentNumber = number % 10;
-  for(uint32_t currentPlace = 0; number > 0; number /= 10, currentNumber = number % 10, ++currentPlace)
-  {
-    Serial.println(currentPlace);
-    DisplayDigit( currentNumber, currentPlace, pixels.Color(255, 0, 0) );
-  }
-
-  pixels.show(); // This sends the updated pixel color to the hardware.
-}
-
-void ClearStrip() {
-  for(uint16_t i=0; i<pixels.numPixels(); i++) {
-      pixels.setPixelColor(i, pixels.Color(0,0,0));
-  }
-  pixels.show();
-}
-
-void DisplayDashes(uint32_t color) {
-  pixels.clear(); 
-  int led = 0;
-  for(int disp = 0; disp < NUMDISPLAYS; disp++){
-    for(int seg=0; seg < NUMSEGMENTS; seg++) {
-      if(6 == seg) {
-        for(int segLed=0; segLed < LEDSPERSEGMENT; segLed++) {
-          pixels.setPixelColor(led++, color);
-        }
-      }
-      else
-      {
-        led += NUMSEGMENTS;
-      }
-    }
-  }
-
-  pixels.show(); // This sends the updated pixel color to the hardware.
 }

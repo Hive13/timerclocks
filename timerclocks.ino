@@ -69,6 +69,25 @@ Timezone usEastern(usEDT, usEST);
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
+byte displayDigits[] = {
+  191, /* 0 [00111111]  Painting numbers, with numbers.  */
+  6,   /* 1 [00000110]                                   */
+  91,  /* 2 [01011011]    1                              */
+  79,  /* 3 [01001111]  6   2                            */
+  102, /* 4 [01100110]    7                              */
+  109, /* 5 [01101101]  5   3                            */
+  253, /* 6 [01111101]    4                              */
+  7,   /* 7 [00000111]                                   */ 
+  255, /* 8 [01111111]                                   */
+  239, /* 9 [01101111]                                   */
+  119, /* A [01110111]                                   */
+  140, /* b [01111100]                                   */
+  88,  /* c [01011000]                                   */
+  94,  /* d [01011110]                                   */
+  121, /* E [01111001]                                   */
+  113, /* F [01110001]                                   */
+};
+
 void setup()
 {
   Serial.begin(115200);
@@ -201,19 +220,6 @@ time_t ntpUpdateTime()
   // return Unix time:
   return ntpTime;
 }
-
-byte displayDigits[] = {
-  191, /* 0 [10111111]  Painting numbers, with numbers.  */
-  6,   /* 1 [00000110]                                   */ 
-  91,  /* 2 [01011011]    1                              */
-  79,  /* 3 [01001111]  6   2                            */ 
-  102, /* 4 [01100110]    7                              */  
-  109, /* 5 [01101101]  5   3                            */ 
-  253, /* 6 [11111101]    4                              */ 
-  7,   /* 7 [00000111]                                   */ 
-  255, /* 8 [11111111]                                   */ 
-  239  /* 9 [11101111]                                   */ 
-};
 
 // place starts from zero for the farthest right digit
 

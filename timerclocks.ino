@@ -227,7 +227,8 @@ void DisplayDigit(uint8_t number, uint8_t place, uint32_t color) {
   for( int seg=0; seg < NUMSEGMENTS; seg++ ) {
     if( displayDigits[number] & (1 << seg) ) {
       for( int segLed=0; segLed < LEDSPERSEGMENT; segLed++ ) {
-        pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*place + LEDSPERSEGMENT*seg + segLed, color );
+        //pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*place + LEDSPERSEGMENT*seg + segLed, color );
+        pixels.setPixelColor(NUMPIXELS - ((LEDSPERDIGIT * place) + (LEDSPERSEGMENT * seg) + segLed) , color);
       }
     }
   }

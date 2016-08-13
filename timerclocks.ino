@@ -92,6 +92,7 @@ void setup()
 void loop()
 {
   uint32_t the_time;
+  uint32_t currentColor;
   utc = now();    //current time from the Time Library
   eastern = usEastern.toLocal(utc);
   // print the date
@@ -112,15 +113,25 @@ void loop()
       Serial.print("0");
     Serial.println(second()); // print the second
 
-  the_time = minute(eastern) + 100 * hourFormat12(eastern);
-
-  if(random(0, 10) < 3) {
-    DisplaySubliminalMessage(Color(255, 0, 0));
-    ShowPixels();
-    delay(10);
+  // adjust the color of the color according to quiet hours
+  the_time = minute(eastern) + 100 * hour(eastern);
+  if(the_time >= 2230 && the_time <= 730) {
+    currentColor = Color(255, 0, 0);
+  } else if(the_time >= 2200 && the_time < 2230) {
+    currentColor = Color(255, 255, 0);
+  } else {
+    currentColor = Color(0, 255, 0);
   }
 
-  DisplayNumber(the_time, Color(255, 0, 0), 0);
+  if(random(0, 250) < 5) {
+    DisplaySubliminalMessage(currentColor);
+    ShowPixels();
+    delay(500);
+  }
+
+  ClearStrip();
+  DisplayHour(hourFormat12(eastern), currentColor);
+  DisplayMinutes(minute(eastern), currentColor);
   ShowPixels();
   // wait before asking for the time again
   delay(30000);

@@ -19,6 +19,8 @@ extern "C" {
 void DisplayStart(void);
 void DisplaySubliminalMessage(uint32_t color);
 void DisplayDigit(uint8_t number, uint8_t place, uint32_t color);
+void DisplayHour(uint8_t hour, uint32_t color);
+void DisplayMinutes(uint8_t minutes, uint32_t color);
 void DisplayNumber(uint32_t number, uint32_t color, unsigned char show_dot);
 void ClearStrip();
 void ShowPixels();

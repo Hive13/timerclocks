@@ -66,6 +66,19 @@ void DisplayDigit(uint8_t number, uint8_t place, uint32_t color) {
   //pixels.show(); // This sends the updated pixel color to the hardware.
 }
 
+
+void DisplayHour(uint8_t hour, uint32_t color) {
+  DisplayDigit(hour%10, 3, color);
+  if(hour/10 > 0)
+    DisplayDigit(hour/10, 4, color);
+}
+
+void DisplayMinutes(uint8_t minutes, uint32_t color) {
+  DisplayDigit(minutes%10, 0, color);
+  DisplayDigit(minutes/10, 1, color);
+}
+
+
 void DisplayNumber(uint32_t number, uint32_t color, unsigned char show_dot) {
   uint32_t currentNumber = 0;
   

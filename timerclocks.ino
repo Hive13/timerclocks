@@ -94,9 +94,8 @@ void setup()
   Serial.println();
   Serial.println();
   
-  pixels.setBrightness(10);
+  pixels.setBrightness(20);
   pixels.begin(); // This initializes the NeoPixel library.
-  DisplayDigit(pow(10, NUMDISPLAYS) - 1, pixels.Color(255,0,0), 0);
 
 
   // We start by connecting to a WiFi network
@@ -146,14 +145,13 @@ void loop()
       Serial.print("0");
     Serial.println(second()); // print the second
 
-  the_time = second() + 100 * minute();
+  the_time = minute(eastern) + 100 * hourFormat12(eastern);
 
-  DisplayNumber((uint32_t) 9, pixels.Color(255,0,0), 0);
-  //DisplayNumber(the_time, pixels.Color(255,0,0), 0);
+  DisplayNumber(the_time, pixels.Color(255,0,0), 0);
 
 
   // wait before asking for the time again
-  delay(500);
+  delay(1000);
 }
 
 // send an NTP request to the time server at the given address
@@ -227,8 +225,7 @@ void DisplayDigit(uint8_t number, uint8_t place, uint32_t color) {
   for( int seg=0; seg < NUMSEGMENTS; seg++ ) {
     if( displayDigits[number] & (1 << seg) ) {
       for( int segLed=0; segLed < LEDSPERSEGMENT; segLed++ ) {
-        //pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*place + LEDSPERSEGMENT*seg + segLed, color );
-        pixels.setPixelColor(NUMPIXELS - ((LEDSPERDIGIT * place) + (LEDSPERSEGMENT * seg) + segLed) , color);
+        pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*place + LEDSPERSEGMENT*seg + segLed - 1, color );
       }
     }
   }
@@ -249,8 +246,11 @@ void DisplayNumber(uint32_t number, uint32_t color, unsigned char show_dot) {
   currentNumber = number % 10;
   for(uint32_t currentPlace = 0; number > 0; number /= 10, currentNumber = number % 10, ++currentPlace)
   {
-    Serial.println(currentPlace);
-    DisplayDigit( currentNumber, currentPlace, pixels.Color(255, 0, 0) );
+    DisplayDigit( currentNumber, currentPlace, color );
+  }
+
+  if( show_dot ) {
+    pixels.setPixelColor( NUMPIXELS, color );
   }
 
   pixels.show(); // This sends the updated pixel color to the hardware.

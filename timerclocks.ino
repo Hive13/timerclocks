@@ -112,12 +112,12 @@ void loop()
       Serial.print("0");
     Serial.println(second()); // print the second
 
-  the_time = second() + 100 * minute();
+  the_time = minute(eastern) + 100 * hourFormat12(eastern);
 
   DisplayNumber(the_time, Color(255, 0, 0), 0);
 
   // wait before asking for the time again
-  delay(500);
+  delay(1000);
 }
 
 // send an NTP request to the time server at the given address

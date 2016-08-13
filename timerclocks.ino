@@ -30,7 +30,7 @@
 #include <Adafruit_NeoPixel.h>
 
 void ClearStrip();
-void DisplayDigit(long number, uint32_t color, unsigned char show_dot);
+void DisplayNumber(long number, uint32_t color, unsigned char show_dot);
 
 // Which pin on the ESP is connected to the NeoPixels?
 #define PIN            D1
@@ -69,19 +69,6 @@ Timezone usEastern(usEDT, usEST);
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-byte displayDigits[] = {
-  191, /* 0 [10111111]  Painting numbers, with numbers.  */
-  6,   /* 1 [00000110]                                   */ 
-  91,  /* 2 [01011011]    1                              */
-  79,  /* 3 [01001111]  6   2                            */ 
-  102, /* 4 [01100110]    7                              */  
-  109, /* 5 [01101101]  5   3                            */ 
-  253, /* 6 [11111101]    4                              */ 
-  7,   /* 7 [00000111]                                   */ 
-  255, /* 8 [11111111]                                   */ 
-  239  /* 9 [11101111]                                   */ 
-};
-
 void setup()
 {
   Serial.begin(115200);
@@ -119,7 +106,7 @@ void setup()
 
 void loop()
 {
-  unsigned short the_time;
+  uint32_t the_time;
   utc = now();    //current time from the Time Library
   eastern = usEastern.toLocal(utc);
   // print the date
@@ -142,7 +129,8 @@ void loop()
 
   the_time = second() + 100 * minute();
 
-  DisplayDigit(the_time, pixels.Color(255,0,0), 0);
+  DisplayNumber((uint32_t) 9, pixels.Color(255,0,0), 0);
+  //DisplayNumber(the_time, pixels.Color(255,0,0), 0);
 
 
   // wait before asking for the time again
@@ -214,50 +202,49 @@ time_t ntpUpdateTime()
   return ntpTime;
 }
 
-void DisplayNumber(long number, uint32_t color) {
+byte displayDigits[] = {
+  191, /* 0 [10111111]  Painting numbers, with numbers.  */
+  6,   /* 1 [00000110]                                   */ 
+  91,  /* 2 [01011011]    1                              */
+  79,  /* 3 [01001111]  6   2                            */ 
+  102, /* 4 [01100110]    7                              */  
+  109, /* 5 [01101101]  5   3                            */ 
+  253, /* 6 [11111101]    4                              */ 
+  7,   /* 7 [00000111]                                   */ 
+  255, /* 8 [11111111]                                   */ 
+  239  /* 9 [11101111]                                   */ 
+};
+
+// place starts from zero for the farthest right digit
+
+void DisplayDigit(uint8_t number, uint8_t place, uint32_t color) {
+  for( int seg=0; seg < NUMSEGMENTS; seg++ ) {
+    if( displayDigits[number] & (1 << seg) ) {
+      for( int segLed=0; segLed < LEDSPERSEGMENT; segLed++ ) {
+        pixels.setPixelColor( (NUMPIXELS - LEDSPERDIGIT) - LEDSPERDIGIT*place + LEDSPERSEGMENT*seg + segLed, color );
+      }
+    }
+  }
   
+  pixels.show(); // This sends the updated pixel color to the hardware.
 }
 
-void DisplayDigit(long number, uint32_t color, unsigned char show_dot) {
-  long oldval;
+void DisplayNumber(uint32_t number, uint32_t color, unsigned char show_dot) {
+  uint32_t currentNumber = 0;
+  
   /* int number = a number from 0-99999 */
   if(number < 0 || number > MAXDISPLAYVAL) {
     return;
   }
   
-  if(number == oldval) {
-    return;  
-  }
-  oldval = number;
-  
-  int led = 0;
-  int digits[5]; 
-
   pixels.clear(); 
-  long divisor;
-  long modulo = MAXDISPLAYVAL + 1;
-  
-  for(int disp = 0; disp < NUMDISPLAYS; disp++){
-    divisor = modulo / 10;
-    digits[disp] = (number % modulo) / divisor; 
-    /* Guard against insgnificant zero to left of decimal point. */
-    if((disp > 1) || (number >= divisor)) {
-      for(int seg=0; seg < NUMSEGMENTS; seg++) {
-        if((displayDigits[digits[disp]] & (1 << seg))) {
-          for(int segLed=0; segLed < LEDSPERSEGMENT; segLed++) {
-            pixels.setPixelColor(led++, color);
-          }
-        }
-        else
-          led += LEDSPERSEGMENT;
-      }
-    } else
-      led += LEDSPERDIGIT;
-    modulo = divisor;
+
+  currentNumber = number % 10;
+  for(uint32_t currentPlace = 0; number > 0; number /= 10, currentNumber = number % 10, ++currentPlace)
+  {
+    Serial.println(currentPlace);
+    DisplayDigit( currentNumber, currentPlace, pixels.Color(255, 0, 0) );
   }
-  
-  if (show_dot)
-    pixels.setPixelColor(led++, color);
 
   pixels.show(); // This sends the updated pixel color to the hardware.
 }

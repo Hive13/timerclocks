@@ -115,7 +115,7 @@ void loop()
 
   // adjust the color of the color according to quiet hours
   the_time = minute(eastern) + 100 * hour(eastern);
-  if(the_time >= 2230 && the_time <= 730) {
+  if(the_time >= 2230 || the_time <= 730) {
     currentColor = Color(255, 0, 0);
   } else if(the_time >= 2200 && the_time < 2230) {
     currentColor = Color(255, 255, 0);
@@ -123,7 +123,7 @@ void loop()
     currentColor = Color(0, 255, 0);
   }
 
-  if(random(0, 250) < 5) {
+  if(random(0, 250) < 15) {
     DisplaySubliminalMessage(currentColor);
     ShowPixels();
     delay(500);

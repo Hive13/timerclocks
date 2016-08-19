@@ -74,8 +74,9 @@ void DisplayHour(uint8_t hour, uint32_t color) {
 }
 
 void DisplayMinutes(uint8_t minutes, uint32_t color) {
-  DisplayDigit(minutes%10, 0, color);
-  DisplayDigit(minutes/10, 1, color);
+  DisplayDigit(minutes%10, 1, color);
+  DisplayDigit(minutes/10, 2, color);
+  pixels.setPixelColor(NUMPIXELS-1, color);
 }
 
 
